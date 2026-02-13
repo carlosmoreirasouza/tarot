@@ -3,35 +3,58 @@ export default function Home() {
     <main className="container">
       <div className="card">
         <div className="header">
-          <h1 className="h1">🔮 Tiragem de Tarot</h1>
+          <h1 className="h1">🔮 Escolha sua Tiragem</h1>
           <p className="lead">
-            Uma leitura objetiva e personalizada para o tema que você precisa agora — com um tom místico, mas
-            com clareza e foco.
+            Escolha o nível de profundidade da sua leitura.
           </p>
-
-          <div className="actions">
-            <a className="btn btn-primary" href="/tiragem">
-              Quero minha tiragem
-            </a>
-            <a className="btn btn-ghost" href="#como-funciona">
-              Como funciona
-            </a>
-          </div>
         </div>
 
-        <div className="section" id="como-funciona">
-          <h2 style={{ marginTop: 0 }}>Como funciona</h2>
-          <ol style={{ lineHeight: 1.9, marginBottom: 0, color: "rgba(29,21,40,.85)" }}>
-            <li>Você preenche o formulário com o tema e seus dados.</li>
-            <li>Você segue para o pagamento via Stone.</li>
-            <li>Após pagar, você confirma e eu envio sua leitura.</li>
-          </ol>
+        <div className="section">
+          <div className="grid2">
+            
+            <Plano
+              titulo="3 Cartas"
+              descricao="Leitura direta e objetiva para um tema específico."
+              preco="R$ 29,90"
+              plano="3"
+            />
 
-          <p className="small" style={{ marginTop: 16 }}>
-            Atendimento e entrega combinados após confirmação do pagamento.
-          </p>
+            <Plano
+              titulo="5 Cartas"
+              descricao="Análise mais profunda com orientação prática."
+              preco="R$ 49,90"
+              plano="5"
+            />
+
+            <Plano
+              titulo="7 Cartas - Completo"
+              descricao="Leitura completa com visão espiritual e caminhos futuros."
+              preco="R$ 99,90"
+              plano="7"
+            />
+
+          </div>
         </div>
       </div>
     </main>
+  );
+}
+
+function Plano({ titulo, descricao, preco, plano }: any) {
+  return (
+    <div className="card" style={{ padding: 18 }}>
+      <h3 style={{ marginTop: 0 }}>{titulo}</h3>
+      <p style={{ color: "rgba(29,21,40,.75)" }}>{descricao}</p>
+      <strong style={{ fontSize: 20 }}>{preco}</strong>
+
+      <div style={{ marginTop: 14 }}>
+        <a
+          className="btn btn-primary"
+          href={`/tiragem?plano=${plano}`}
+        >
+          Escolher
+        </a>
+      </div>
+    </div>
   );
 }
