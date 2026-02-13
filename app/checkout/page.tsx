@@ -96,6 +96,13 @@ export default function CheckoutPage() {
             <Link className="btn btn-ghost" href="/tiragem">
               Editar dados
             </Link>
+            {status === "sent" && (
+              <div className="actions" style={{ marginTop: 14 }}>
+                <a className="btn btn-primary" href="/">
+                  Voltar ao início
+                </a>
+              </div>
+            )}
           </div>
 
           <p className="small" style={{ marginTop: 12 }}>
