@@ -96,7 +96,7 @@ export default function CheckoutPage() {
       </div>
 
       <p style={{ fontSize: 12, opacity: 0.7, marginTop: 12 }}>
-        Depois do pagamento, me envie o comprovante (ou a gente automatiza com webhook na próxima etapa).
+        Depois do pagamento, me envie o comprovante para altarmisticostore@gmail.com.
       </p>
     </main>
   );
