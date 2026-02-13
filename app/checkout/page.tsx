@@ -5,6 +5,15 @@ import Link from "next/link";
 import { loadRequest, clearRequest } from "@/lib/storage";
 import type { ReadingForm } from "@/lib/schema";
 
+const prices: Record<string, { valor: number; link: string }> = {
+  "3": { valor: 29.9, link: "LINK_STONE_3" },
+  "5": { valor: 49.9, link: "LINK_STONE_5" },
+  "7": { valor: 99.9, link: "LINK_STONE_7" },
+};
+
+const planoInfo = prices[data.plano];
+
+
 // Troque pelo seu link real da Stone (pode ser fixo por enquanto)
 const STONE_PAYMENT_URL = "https://SEU-LINK-DA-STONE-AQUI";
 
@@ -45,9 +54,14 @@ export default function CheckoutPage() {
       </div>
 
       <div style={{ display: "flex", gap: 12, marginTop: 18, flexWrap: "wrap" }}>
-        <a href={STONE_PAYMENT_URL} target="_blank" rel="noreferrer" style={btnStyle}>
-          Pagar com Stone
+       <a
+          className="btn btn-primary"
+          href={planoInfo.link}
+          target="_blank"
+        >
+          Pagar R$ {planoInfo.valor.toFixed(2)}
         </a>
+
 
         <Link
           href="/tiragem"
