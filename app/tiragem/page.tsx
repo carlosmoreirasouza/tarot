@@ -4,15 +4,22 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { readingSchema, type ReadingForm } from "@/lib/schema";
 import { saveRequest } from "@/lib/storage";
+import { useSearchParams } from "next/navigation";
+
 
 const temas: ReadingForm["tema"][] = ["Amor", "Financeiro", "Saúde", "Carreira", "Espiritualidade", "Outro"];
 
 export default function TiragemPage() {
   const router = useRouter();
 
+  const params = useSearchParams();
+  const plano = params.get("plano") || "3";
+  
   const [form, setForm] = useState<Partial<ReadingForm>>({
+    plano: plano as any,
     tema: "Amor",
   });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const showOutro = useMemo(() => form.tema === "Outro", [form.tema]);
