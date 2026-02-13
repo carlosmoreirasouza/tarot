@@ -22,8 +22,8 @@ export default function CheckoutPage() {
     // referência simples pra você identificar (não é confirmação automática)
     setTxRef(`TRT-${Date.now().toString(36).toUpperCase()}`);
   }, []);
-
-  const planoInfo = prices[data.plano] ?? prices["3"];
+ 
+  const planoInfo = data ? prices[data.plano] : prices["3"];
   
   if (!data) {
   return (
