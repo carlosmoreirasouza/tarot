@@ -23,23 +23,24 @@ export default function CheckoutPage() {
     setTxRef(`TRT-${Date.now().toString(36).toUpperCase()}`);
   }, []);
 
-  const planoInfo = useMemo(() => {
-    if (!data) return null;
-    return prices[data.plano];
-  }, [data]);
-
-  if (!data || !planoInfo) {
-    return (
-      <main className="container">
-        <div className="card">
-          <div className="header">
-            <h1 className="h1">Carregando…</h1>
-            <p className="lead">Aguarde um instante.</p>
-          </div>
+  const planoInfo = prices[data.plano] ?? prices["3"];
+  
+  if (!data) {
+  return (
+    <main className="container">
+      <div className="card">
+        <div className="header">
+          <h1 className="h1">Carregando…</h1>
+          <p className="lead">Aguarde um instante.</p>
         </div>
-      </main>
-    );
-  }
+      </div>
+    </main>
+  );
+}
+
+// ✅ agora aqui nunca é null, e tem fallback
+const planoInfo = prices[data.plano] ?? prices["3"];
+
 
   const pixKey = process.env.NEXT_PUBLIC_PIX_KEY; // vamos setar já já
 
