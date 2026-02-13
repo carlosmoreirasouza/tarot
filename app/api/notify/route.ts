@@ -46,6 +46,7 @@ Email: ${email || "-"}
 Tema: ${temaFinal || "-"}
 Signo: ${signo || "-"}
 Idade: ${idade ?? "-"}
+Plano escolhido: ${data.plano} cartas
 
 Pergunta:
 ${(pergunta || "-").toString().trim()}
