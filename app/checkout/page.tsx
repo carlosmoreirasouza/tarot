@@ -38,10 +38,6 @@ export default function CheckoutPage() {
   );
 }
 
-// ✅ agora aqui nunca é null, e tem fallback
-const planoInfo = prices[data.plano] ?? prices["3"];
-
-
   const pixKey = process.env.NEXT_PUBLIC_PIX_KEY; // vamos setar já já
 
   async function copyPix() {
