@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Home() {
+export default function TiragemPage() {
   return (
     <main style={{ maxWidth: 760, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
       <h1 style={{ fontSize: 34, marginBottom: 8 }}>🔮 Tiragem de Tarot Personalizada</h1>
