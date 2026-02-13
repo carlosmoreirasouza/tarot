@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { loadRequest, clearRequest } from "@/lib/storage";
+import { loadRequest } from "@/lib/storage";
 import type { ReadingForm } from "@/lib/schema";
 
 const prices: Record<string, { valor: number; link: string }> = {
@@ -10,12 +10,6 @@ const prices: Record<string, { valor: number; link: string }> = {
   "5": { valor: 49.9, link: "https://payment-link-v3.stone.com.br/pl_3qdJN6DjM9y59nMUjahDeYGmpB8041xr" },
   "7": { valor: 99.9, link: "https://payment-link-v3.stone.com.br/pl_0WqlGAy4LnowYp9tyTpVPRaK8e1j5Dbz" },
 };
-
-const planoInfo = prices[data.plano];
-
-
-// Troque pelo seu link real da Stone (pode ser fixo por enquanto)
-const STONE_PAYMENT_URL = "https://SEU-LINK-DA-STONE-AQUI";
 
 export default function CheckoutPage() {
   const [data, setData] = useState<ReadingForm | null>(null);
@@ -25,99 +19,37 @@ export default function CheckoutPage() {
   }, []);
 
   if (!data) {
-    return (
-      <main style={{ maxWidth: 760, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
-        <h1 style={{ fontSize: 24 }}>Sem solicitação</h1>
-        <p>Volte e preencha o formulário para gerar sua tiragem.</p>
-        <Link href="/tiragem">Ir para o formulário</Link>
-      </main>
-    );
+    return <div>Carregando...</div>;
   }
 
-  const temaFinal = data.tema === "Outro" ? data.outroTema : data.tema;
+  // ✅ AGORA está dentro do componente
+  const planoInfo = prices[data.plano];
 
   return (
-    <main style={{ maxWidth: 760, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
-      <h1 style={{ fontSize: 28, marginBottom: 6 }}>Confirmar e pagar</h1>
-      <p style={{ opacity: 0.8, marginTop: 0 }}>
-        Confira os dados antes de seguir para o pagamento.
-      </p>
+    <main className="container">
+      <div className="card">
+        <div className="header">
+          <h1 className="h1">Confirmar pagamento</h1>
 
-      <div style={{ marginTop: 18, border: "1px solid #eee", borderRadius: 12, padding: 14, lineHeight: 1.8 }}>
-        <Row k="Nome" v={data.nome} />
-        <Row k="WhatsApp" v={data.whatsapp} />
-        <Row k="Email" v={data.email} />
-        <Row k="Tema" v={temaFinal ?? ""} />
-        <Row k="Signo" v={data.signo} />
-        <Row k="Idade" v={String(data.idade)} />
-        <Row k="Pergunta" v={data.pergunta?.trim() ? data.pergunta : "—"} />
+          <p>Plano escolhido: {data.plano} cartas</p>
+          <p>Valor: R$ {planoInfo.valor.toFixed(2)}</p>
+
+          <div className="actions">
+            <a
+              className="btn btn-primary"
+              href={planoInfo.link}
+              target="_blank"
+            >
+              Pagar R$ {planoInfo.valor.toFixed(2)}
+            </a>
+
+            <Link className="btn btn-ghost" href="/tiragem">
+              Voltar
+            </Link>
+          </div>
+        </div>
       </div>
-
-      <div style={{ display: "flex", gap: 12, marginTop: 18, flexWrap: "wrap" }}>
-       <a
-          className="btn btn-primary"
-          href={planoInfo.link}
-          target="_blank"
-        >
-          Pagar R$ {planoInfo.valor.toFixed(2)}
-        </a>
-
-
-        <Link
-          href="/tiragem"
-          style={{
-            border: "1px solid #ddd",
-            padding: "12px 16px",
-            borderRadius: 10,
-            textDecoration: "none",
-            color: "black",
-            fontWeight: 700,
-          }}
-        >
-          Editar dados
-        </Link>
-
-        <button
-          onClick={() => {
-            clearRequest();
-            setData(null);
-          }}
-          style={{
-            border: "1px solid #ddd",
-            padding: "12px 16px",
-            borderRadius: 10,
-            background: "white",
-            cursor: "pointer",
-            fontWeight: 700,
-          }}
-        >
-          Limpar
-        </button>
-      </div>
-
-      <p style={{ fontSize: 12, opacity: 0.7, marginTop: 12 }}>
-        Depois do pagamento, me envie o comprovante para altarmisticostore@gmail.com.
-      </p>
     </main>
   );
 }
-
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 10 }}>
-      <strong>{k}:</strong>
-      <span>{v}</span>
-    </div>
-  );
-}
-
-const btnStyle: React.CSSProperties = {
-  background: "black",
-  color: "white",
-  padding: "12px 16px",
-  borderRadius: 10,
-  textDecoration: "none",
-  fontWeight: 800,
-  display: "inline-block",
-};
 
