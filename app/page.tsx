@@ -1,68 +1,37 @@
 export default function Home() {
   return (
-    <main
-      style={{
-        maxWidth: 760,
-        margin: "40px auto",
-        padding: 16,
-        fontFamily: "system-ui",
-      }}
-    >
-      <h1 style={{ fontSize: 34, marginBottom: 8 }}>🔮 Tiragem de Tarot Personalizada</h1>
+    <main className="container">
+      <div className="card">
+        <div className="header">
+          <h1 className="h1">🔮 Tiragem de Tarot</h1>
+          <p className="lead">
+            Uma leitura objetiva e personalizada para o tema que você precisa agora — com um tom místico, mas
+            com clareza e foco.
+          </p>
 
-      <p style={{ lineHeight: 1.6, fontSize: 16 }}>
-        Você responde algumas perguntas rápidas e recebe uma leitura direcionada para o tema que você precisa
-        agora (amor, financeiro, saúde, carreira e mais).
-      </p>
+          <div className="actions">
+            <a className="btn btn-primary" href="/tiragem">
+              Quero minha tiragem
+            </a>
+            <a className="btn btn-ghost" href="#como-funciona">
+              Como funciona
+            </a>
+          </div>
+        </div>
 
-      <div style={{ marginTop: 20, display: "flex", gap: 12, flexWrap: "wrap" }}>
-        {/* Botão 1: navegação garantida */}
-        <a
-          href="/tiragem"
-          style={{
-            background: "black",
-            color: "white",
-            padding: "12px 18px",
-            borderRadius: 10,
-            textDecoration: "none",
-            fontWeight: 600,
-            display: "inline-block",
-          }}
-        >
-          Quero minha tiragem
-        </a>
+        <div className="section" id="como-funciona">
+          <h2 style={{ marginTop: 0 }}>Como funciona</h2>
+          <ol style={{ lineHeight: 1.9, marginBottom: 0, color: "rgba(29,21,40,.85)" }}>
+            <li>Você preenche o formulário com o tema e seus dados.</li>
+            <li>Você segue para o pagamento via Stone.</li>
+            <li>Após pagar, você confirma e eu envio sua leitura.</li>
+          </ol>
 
-        {/* Botão 2: scroll garantido */}
-        <a
-          href="#como-funciona"
-          style={{
-            border: "1px solid #ddd",
-            padding: "12px 18px",
-            borderRadius: 10,
-            textDecoration: "none",
-            fontWeight: 600,
-            color: "black",
-            display: "inline-block",
-          }}
-        >
-          Como funciona
-        </a>
+          <p className="small" style={{ marginTop: 16 }}>
+            Atendimento e entrega combinados após confirmação do pagamento.
+          </p>
+        </div>
       </div>
-
-      <section id="como-funciona" style={{ marginTop: 40 }}>
-        <h2 style={{ fontSize: 22 }}>Como funciona</h2>
-
-        <ol style={{ lineHeight: 1.8 }}>
-          <li>Você preenche o formulário com o tema e seus dados.</li>
-          <li>Você confirma e segue para o pagamento via Stone.</li>
-          <li>Após o pagamento, você recebe a confirmação e eu preparo sua leitura.</li>
-        </ol>
-      </section>
-
-      <footer style={{ marginTop: 60, fontSize: 12, opacity: 0.75 }}>
-        Atendimento e entrega combinados após confirmação do pagamento.
-      </footer>
     </main>
   );
 }
-
