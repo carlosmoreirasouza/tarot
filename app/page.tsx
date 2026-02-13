@@ -1,16 +1,23 @@
-import Link from "next/link";
-
 export default function Home() {
   return (
-    <main style={{ maxWidth: 760, margin: "40px auto", padding: 16, fontFamily: "system-ui" }}>
+    <main
+      style={{
+        maxWidth: 760,
+        margin: "40px auto",
+        padding: 16,
+        fontFamily: "system-ui",
+      }}
+    >
       <h1 style={{ fontSize: 34, marginBottom: 8 }}>🔮 Tiragem de Tarot Personalizada</h1>
+
       <p style={{ lineHeight: 1.6, fontSize: 16 }}>
         Você responde algumas perguntas rápidas e recebe uma leitura direcionada para o tema que você precisa
         agora (amor, financeiro, saúde, carreira e mais).
       </p>
 
       <div style={{ marginTop: 20, display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <Link
+        {/* Botão 1: navegação garantida */}
+        <a
           href="/tiragem"
           style={{
             background: "black",
@@ -19,11 +26,13 @@ export default function Home() {
             borderRadius: 10,
             textDecoration: "none",
             fontWeight: 600,
+            display: "inline-block",
           }}
         >
           Quero minha tiragem
-        </Link>
+        </a>
 
+        {/* Botão 2: scroll garantido */}
         <a
           href="#como-funciona"
           style={{
@@ -33,6 +42,7 @@ export default function Home() {
             textDecoration: "none",
             fontWeight: 600,
             color: "black",
+            display: "inline-block",
           }}
         >
           Como funciona
@@ -41,6 +51,7 @@ export default function Home() {
 
       <section id="como-funciona" style={{ marginTop: 40 }}>
         <h2 style={{ fontSize: 22 }}>Como funciona</h2>
+
         <ol style={{ lineHeight: 1.8 }}>
           <li>Você preenche o formulário com o tema e seus dados.</li>
           <li>Você confirma e segue para o pagamento via Stone.</li>
