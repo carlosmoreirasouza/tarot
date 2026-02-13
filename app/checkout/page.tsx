@@ -6,9 +6,9 @@ import { loadRequest, clearRequest } from "@/lib/storage";
 import type { ReadingForm } from "@/lib/schema";
 
 const prices: Record<string, { valor: number; link: string }> = {
-  "3": { valor: 29.9, link: "LINK_STONE_3" },
-  "5": { valor: 49.9, link: "LINK_STONE_5" },
-  "7": { valor: 99.9, link: "LINK_STONE_7" },
+  "3": { valor: 29.9, link: "https://payment-link-v3.stone.com.br/pl_wGY1WnoNjvgXzE8IqJT0VKD7QB6Ab5Z9" },
+  "5": { valor: 49.9, link: "https://payment-link-v3.stone.com.br/pl_3qdJN6DjM9y59nMUjahDeYGmpB8041xr" },
+  "7": { valor: 99.9, link: "https://payment-link-v3.stone.com.br/pl_0WqlGAy4LnowYp9tyTpVPRaK8e1j5Dbz" },
 };
 
 const planoInfo = prices[data.plano];
