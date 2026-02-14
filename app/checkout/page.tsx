@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 type Plano = "3" | "5" | "7";
 
@@ -24,28 +24,28 @@ function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function safePlano(p: string | null): Plano {
-  if (p === "3" || p === "5" || p === "7") return p;
-  return "3";
-}
-
 function genRef(plano: Plano) {
-  // referência simples e curta (você pode mudar)
   const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
   return `CONS-${plano}-${rand}`;
 }
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const [plano, setPlano] = useState<Plano>("3");
 
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  const p = params.get("plano");
-  if (p === "3" || p === "5" || p === "7") {
-    setPlano(p);
-  }
-}, []);
+  const [plano, setPlano] = useState<Plano>("3");
+  const [ref, setRef] = useState<string>(() => genRef("3"));
+
+  // Lê o plano da URL no client
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get("plano");
+    if (p === "3" || p === "5" || p === "7") setPlano(p);
+  }, []);
+
+  // Sempre que plano mudar, gera nova referência
+  useEffect(() => {
+    setRef(genRef(plano));
+  }, [plano]);
 
   const planoInfo = PRICES[plano];
 
@@ -62,12 +62,15 @@ useEffect(() => {
     idade: "",
   });
 
-  const [ref] = useState<string>(() => genRef(plano));
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [copyOk, setCopyOk] = useState<string>("");
 
-  const qrSrc = `/qr/pix-${plano}.png`; // public/qr/pix-3.png etc.
+  // Debug/estado do QR
+  const [qrError, setQrError] = useState<string>("");
+
+  // ✅ cache-buster: evita cache de 404 antigo
+  const qrSrc = `/qr/pix-${plano}.png?v=${encodeURIComponent(ref)}`;
 
   const canSubmit =
     form.nome.trim() &&
@@ -83,6 +86,7 @@ useEffect(() => {
 
     setLoading(true);
     setCopyOk("");
+    setQrError("");
 
     try {
       const payload = {
@@ -126,7 +130,6 @@ useEffect(() => {
       setCopyOk("Chave PIX copiada!");
       setTimeout(() => setCopyOk(""), 2500);
     } catch {
-      // fallback
       const ta = document.createElement("textarea");
       ta.value = PIX_CHAVE;
       document.body.appendChild(ta);
@@ -148,9 +151,7 @@ useEffect(() => {
         <div style={styles.header}>
           <div style={styles.badge}>Checkout</div>
           <h1 style={styles.h1}>Finalizar Consulta</h1>
-          <p style={styles.p}>
-            Envie seus dados. Em seguida, faça o PIX para confirmar.
-          </p>
+          <p style={styles.p}>Envie seus dados. Em seguida, faça o PIX para confirmar.</p>
         </div>
 
         <div style={styles.card}>
@@ -172,11 +173,7 @@ useEffect(() => {
         {!sent && (
           <form onSubmit={onSubmit} style={styles.card}>
             <div style={styles.grid}>
-              <Field
-                label="Nome"
-                value={form.nome}
-                onChange={(v) => setForm((s) => ({ ...s, nome: v }))}
-              />
+              <Field label="Nome" value={form.nome} onChange={(v) => setForm((s) => ({ ...s, nome: v }))} />
               <Field
                 label="E-mail"
                 value={form.email}
@@ -195,11 +192,7 @@ useEffect(() => {
                 onChange={(v) => setForm((s) => ({ ...s, tema: v }))}
                 placeholder="Amor, dinheiro, saúde..."
               />
-              <Field
-                label="Signo"
-                value={form.signo}
-                onChange={(v) => setForm((s) => ({ ...s, signo: v }))}
-              />
+              <Field label="Signo" value={form.signo} onChange={(v) => setForm((s) => ({ ...s, signo: v }))} />
               <Field
                 label="Idade"
                 value={form.idade}
@@ -240,13 +233,12 @@ useEffect(() => {
             </div>
 
             <div style={styles.card}>
-              <div style={styles.pixTitle}>
-                PIX — {formatBRL(planoInfo.valor)}
-              </div>
+              <div style={styles.pixTitle}>PIX — {formatBRL(planoInfo.valor)}</div>
 
               <div style={styles.pixBox}>
                 <div style={styles.pixLine}>
-                  <strong>Chave:</strong> <span style={styles.mono}>{PIX_CHAVE || "(não configurada)"}</span>
+                  <strong>Chave:</strong>{" "}
+                  <span style={styles.mono}>{PIX_CHAVE || "(não configurada)"}</span>
                 </div>
                 <div style={styles.pixLine}>
                   <strong>Nome:</strong> {PIX_NOME}
@@ -261,14 +253,31 @@ useEffect(() => {
                 <div style={styles.qrWrap}>
                   <img
                     src={qrSrc}
-                    alt="QR Code PIX"
+                    alt={`QR Code PIX plano ${plano}`}
                     style={styles.qrImg}
-                    onError={(e) => {
-                      // debug simples
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    loading="eager"
+                    onError={() => {
+                      setQrError(
+                        `Não consegui carregar o QR. Teste abrir: /qr/pix-${plano}.png`
+                      );
                     }}
+                    onLoad={() => setQrError("")}
                   />
                 </div>
+
+                {qrError && (
+                  <div style={{ marginTop: 8, fontSize: 13, color: "#8a1f1f" }}>
+                    {qrError}
+                    <div style={{ marginTop: 6 }}>
+                      <a href={`/qr/pix-${plano}.png`} target="_blank" rel="noreferrer">
+                        Abrir QR em outra aba
+                      </a>
+                    </div>
+                    <div style={{ marginTop: 6, opacity: 0.85 }}>
+                      Debug: <span style={styles.mono}>{qrSrc}</span>
+                    </div>
+                  </div>
+                )}
 
                 <div style={styles.btnRow}>
                   <button type="button" style={styles.primaryBtn} onClick={copyPix}>
@@ -290,9 +299,7 @@ useEffect(() => {
         )}
 
         <div style={styles.footer}>
-          <span style={styles.footerNote}>
-            ⚠️ A leitura é feita por uma pessoa, não por IA.
-          </span>
+          <span style={styles.footerNote}>⚠️ A leitura é feita por uma pessoa, não por IA.</span>
         </div>
       </div>
     </main>
@@ -338,13 +345,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily:
       'system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
   },
-  container: {
-    maxWidth: 760,
-    margin: "0 auto",
-  },
-  header: {
-    marginBottom: 14,
-  },
+  container: { maxWidth: 760, margin: "0 auto" },
+  header: { marginBottom: 14 },
   badge: {
     display: "inline-block",
     padding: "6px 10px",
@@ -356,17 +358,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 12,
     letterSpacing: 0.4,
   },
-  h1: {
-    fontSize: 34,
-    lineHeight: 1.1,
-    margin: "10px 0 6px",
-    color: "#241a33",
-  },
-  p: {
-    margin: 0,
-    opacity: 0.85,
-    fontSize: 16,
-  },
+  h1: { fontSize: 34, lineHeight: 1.1, margin: "10px 0 6px", color: "#241a33" },
+  p: { margin: 0, opacity: 0.85, fontSize: 16 },
   card: {
     background: "#fff",
     borderRadius: 18,
@@ -382,22 +375,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
     flexWrap: "wrap",
   },
-  planTitle: {
-    fontSize: 16,
-    fontWeight: 800,
-    color: "#2b1d3a",
-  },
-  planPrice: {
-    fontSize: 22,
-    fontWeight: 900,
-    color: "#4b2f88",
-    marginTop: 4,
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr",
-    gap: 12,
-  },
+  planTitle: { fontSize: 16, fontWeight: 800, color: "#2b1d3a" },
+  planPrice: { fontSize: 22, fontWeight: 900, color: "#4b2f88", marginTop: 4 },
+  grid: { display: "grid", gridTemplateColumns: "1fr", gap: 12 },
   label: { display: "grid", gap: 6 },
   labelText: { fontSize: 14, fontWeight: 800, color: "#3b2a50" },
   input: {
@@ -409,13 +389,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 16,
     background: "rgba(120, 70, 220, .04)",
   },
-  miniInfo: {
-    marginTop: 14,
-    display: "grid",
-    gap: 6,
-    fontSize: 14,
-    color: "#2f2440",
-  },
+  miniInfo: { marginTop: 14, display: "grid", gap: 6, fontSize: 14, color: "#2f2440" },
   primaryBtn: {
     marginTop: 14,
     width: "100%",
@@ -426,6 +400,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#fff",
     fontWeight: 900,
     fontSize: 16,
+    cursor: "pointer",
   },
   secondaryBtn: {
     height: 42,
@@ -436,6 +411,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#3e276f",
     fontWeight: 800,
     fontSize: 14,
+    cursor: "pointer",
   },
   success: {
     background: "rgba(46, 204, 113, .10)",
@@ -445,33 +421,19 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#1e6b3a",
     fontSize: 16,
   },
-  pixTitle: {
-    fontSize: 20,
-    fontWeight: 900,
-    color: "#2b1d3a",
-    marginBottom: 10,
-  },
+  pixTitle: { fontSize: 20, fontWeight: 900, color: "#2b1d3a", marginBottom: 10 },
   pixBox: {
     borderRadius: 16,
     border: "1px solid rgba(120, 70, 220, .18)",
     background: "rgba(120, 70, 220, .04)",
     padding: 14,
   },
-  pixLine: {
-    marginTop: 6,
-    fontSize: 15,
-    color: "#2f2440",
-  },
+  pixLine: { marginTop: 6, fontSize: 15, color: "#2f2440" },
   mono: {
     fontFamily:
       'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
   },
-  qrWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: 14,
-    marginBottom: 10,
-  },
+  qrWrap: { display: "flex", justifyContent: "center", marginTop: 14, marginBottom: 10 },
   qrImg: {
     width: 230,
     height: "auto",
@@ -479,31 +441,9 @@ const styles: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(120, 70, 220, .18)",
     background: "#fff",
   },
-  btnRow: {
-    display: "grid",
-    gridTemplateColumns: "1fr",
-    gap: 10,
-    marginTop: 10,
-  },
-  copyOk: {
-    marginTop: 10,
-    fontWeight: 800,
-    color: "#1e6b3a",
-  },
-  hint: {
-    marginTop: 12,
-    fontSize: 13,
-    opacity: 0.85,
-    color: "#2f2440",
-  },
-  footer: {
-    marginTop: 18,
-    display: "flex",
-    justifyContent: "center",
-  },
-  footerNote: {
-    fontSize: 12,
-    color: "#3b2a50",
-    opacity: 0.75,
-  },
+  btnRow: { display: "grid", gridTemplateColumns: "1fr", gap: 10, marginTop: 10 },
+  copyOk: { marginTop: 10, fontWeight: 800, color: "#1e6b3a" },
+  hint: { marginTop: 12, fontSize: 13, opacity: 0.85, color: "#2f2440" },
+  footer: { marginTop: 18, display: "flex", justifyContent: "center" },
+  footerNote: { fontSize: 12, color: "#3b2a50", opacity: 0.75 },
 };
