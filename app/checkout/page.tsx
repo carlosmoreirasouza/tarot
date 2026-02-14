@@ -1,7 +1,4 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense } from "react";
 
 const prices: Record<string, { valor: number; descricao: string }> = {
   "3": { valor: 29.9, descricao: "Consulta 3 cartas" },
@@ -15,14 +12,15 @@ const qrByPlan: Record<string, string> = {
   "7": "/qr/pix-7.png",
 };
 
-export default function CheckoutPage() {
-  const searchParams = useSearchParams();
-  const plano = searchParams.get("plano") ?? "3";
+export default function CheckoutPage({
+  searchParams,
+}: {
+  searchParams: { plano?: string };
+}) {
+  const plano = searchParams?.plano ?? "3";
 
   const planoInfo = prices[plano] ?? prices["3"];
   const qrSrc = qrByPlan[plano] ?? qrByPlan["3"];
-
-  const [copied, setCopied] = useState(false);
 
   const pixKey = process.env.NEXT_PUBLIC_PIX_KEY;
   const pixName = process.env.NEXT_PUBLIC_PIX_NAME;
@@ -33,13 +31,6 @@ export default function CheckoutPage() {
     plano +
     "-" +
     Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  function copyPix() {
-    if (!pixKey) return;
-    navigator.clipboard.writeText(pixKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
 
   return (
     <div
@@ -90,7 +81,6 @@ export default function CheckoutPage() {
             PIX — R$ {planoInfo.valor.toFixed(2)}
           </h3>
 
-          {/* QR CODE */}
           <div style={{ textAlign: "center", marginBottom: 20 }}>
             <img
               src={qrSrc}
@@ -106,56 +96,31 @@ export default function CheckoutPage() {
             />
           </div>
 
-          <p>
-            <strong>Chave:</strong> {pixKey}
-          </p>
-          <p>
-            <strong>Nome:</strong> {pixName}
-          </p>
-          <p>
-            <strong>Cidade:</strong> {pixCity}
-          </p>
-          <p>
-            <strong>Referência:</strong> {referencia}
-          </p>
-
-          <button
-            onClick={copyPix}
-            style={{
-              marginTop: 15,
-              width: "100%",
-              padding: 12,
-              borderRadius: 12,
-              border: "none",
-              background: "#4b2e83",
-              color: "#fff",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            {copied ? "✔ Copiado!" : "Copiar chave PIX"}
-          </button>
+          <p><strong>Chave:</strong> {pixKey}</p>
+          <p><strong>Nome:</strong> {pixName}</p>
+          <p><strong>Cidade:</strong> {pixCity}</p>
+          <p><strong>Referência:</strong> {referencia}</p>
 
           <p style={{ marginTop: 15, fontSize: 14, color: "#555" }}>
-            Após o pagamento, envie o comprovante no WhatsApp
-            (ou aguarde confirmação).
+            Após o pagamento, envie o comprovante no WhatsApp.
           </p>
         </div>
 
-        <button
-          onClick={() => (window.location.href = "/")}
+        <a
+          href="/"
           style={{
-            width: "100%",
+            display: "block",
+            textAlign: "center",
             padding: 14,
             borderRadius: 14,
             border: "1px solid #ccc",
             background: "#fff",
-            cursor: "pointer",
+            textDecoration: "none",
             fontWeight: 600,
           }}
         >
           Voltar ao início
-        </button>
+        </a>
       </div>
     </div>
   );
