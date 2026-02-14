@@ -1,7 +1,6 @@
 "use client";
-export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type Plano = "3" | "5" | "7";
@@ -38,9 +37,16 @@ function genRef(plano: Plano) {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const [plano, setPlano] = useState<Plano>("3");
 
-  const plano = useMemo<Plano>(() => safePlano(searchParams.get("plano")), [searchParams]);
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const p = params.get("plano");
+  if (p === "3" || p === "5" || p === "7") {
+    setPlano(p);
+  }
+}, []);
+
   const planoInfo = PRICES[plano];
 
   const PIX_CHAVE = process.env.NEXT_PUBLIC_PIX_CHAVE || "";
