@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+import Image from "next/image";
+
 type Plano = "3" | "5" | "7";
 
 type FormData = {
@@ -250,20 +252,28 @@ export default function CheckoutPage() {
                   <strong>Referência:</strong> <span style={styles.mono}>{ref}</span>
                 </div>
 
-                <div style={styles.qrWrap}>
-                  <img
-                    src={qrSrc}
+              <div style={styles.qrWrap}>
+                <div style={{ width: 240, height: 240, position: "relative" }}>
+                  <Image
+                    src={`/qr/pix-${plano}.png`}
                     alt={`QR Code PIX plano ${plano}`}
-                    style={styles.qrImg}
-                    loading="eager"
-                    onError={() => {
-                      setQrError(
-                        `Não consegui carregar o QR. Teste abrir: /qr/pix-${plano}.png`
-                      );
-                    }}
-                    onLoad={() => setQrError("")}
+                    fill
+                    unoptimized
+                    priority
+                    style={{ objectFit: "contain", borderRadius: 14, background: "#fff" }}
+                    onError={() => setQrError(`Falhou ao carregar: /qr/pix-${plano}.png`)}
                   />
                 </div>
+              </div>
+              
+              {qrError && (
+                <div style={{ marginTop: 8, fontSize: 13, color: "#8a1f1f" }}>
+                  {qrError} — teste:{" "}
+                  <a href={`/qr/pix-${plano}.png`} target="_blank" rel="noreferrer">
+                    abrir QR
+                  </a>
+                </div>
+              )}
 
                 {qrError && (
                   <div style={{ marginTop: 8, fontSize: 13, color: "#8a1f1f" }}>
