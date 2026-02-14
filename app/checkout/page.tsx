@@ -6,46 +6,52 @@ import { loadRequest } from "@/lib/storage";
 import type { ReadingForm } from "@/lib/schema";
 
 const prices: Record<string, { valor: number; descricao: string }> = {
-  "3": { valor: 29.9, descricao: "Tiragem 3 cartas" },
-  "5": { valor: 49.9, descricao: "Tiragem 5 cartas" },
-  "7": { valor: 99.9, descricao: "Tiragem 7 cartas (completa)" },
+  "3": { valor: 29.9, descricao: "Consulta 3 cartas" },
+  "5": { valor: 49.9, descricao: "Consulta 5 cartas" },
+  "7": { valor: 99.9, descricao: "Consulta completa (7 cartas)" },
 };
+
+const qrByPlan: Record<string, string> = {
+  "3": "/qr/pix-3.png",
+  "5": "/qr/pix-5.png",
+  "7": "/qr/pix-7.png",
+};
+
+function getPixCopiaCola(plano: string) {
+  if (plano === "3") return process.env.NEXT_PUBLIC_PIX_COPIA_COLA_3 || "";
+  if (plano === "5") return process.env.NEXT_PUBLIC_PIX_COPIA_COLA_5 || "";
+  if (plano === "7") return process.env.NEXT_PUBLIC_PIX_COPIA_COLA_7 || "";
+  return "";
+}
 
 export default function CheckoutPage() {
   const [data, setData] = useState<ReadingForm | null>(null);
   const [txRef, setTxRef] = useState("");
-  const [status, setStatus] = useState<"idle" | "copy" | "sending" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
     const d = loadRequest();
     setData(d);
-    // referência simples pra você identificar (não é confirmação automática)
-    setTxRef(`TRT-${Date.now().toString(36).toUpperCase()}`);
+    setTxRef(`CONS-${Date.now().toString(36).toUpperCase()}`);
   }, []);
- 
-  const planoInfo = data ? prices[data.plano] : prices["3"];
-  
+
   if (!data) {
-  return (
-    <main className="container">
-      <div className="card">
-        <div className="header">
-          <h1 className="h1">Carregando…</h1>
-          <p className="lead">Aguarde um instante.</p>
+    return (
+      <main className="container">
+        <div className="card">
+          <div className="header">
+            <h1 className="h1">Carregando…</h1>
+            <p className="lead">Aguarde um instante.</p>
+          </div>
         </div>
-      </div>
-    </main>
-  );
-}
-
-  const pixKey = process.env.NEXT_PUBLIC_PIX_KEY; // vamos setar já já
-
-  async function copyPix() {
-    if (!pixKey) return;
-    await navigator.clipboard.writeText(pixKey);
-    setStatus("copy");
-    setTimeout(() => setStatus("idle"), 1200);
+      </main>
+    );
   }
+
+  const planoInfo = prices[data.plano] ?? prices["3"];
+  const qrSrc = qrByPlan[data.plano] ?? qrByPlan["3"];
+  const pixCopiaCola = getPixCopiaCola(data.plano);
 
   async function notifyPaid() {
     setStatus("sending");
@@ -61,10 +67,23 @@ export default function CheckoutPage() {
           metodo: "PIX",
         }),
       });
-      if (!res.ok) throw new Error("Falha");
+
+      if (!res.ok) throw new Error("Falha ao enviar");
       setStatus("sent");
     } catch {
       setStatus("error");
+    }
+  }
+
+  async function copyPix() {
+    try {
+      if (!pixCopiaCola) return;
+      await navigator.clipboard.writeText(pixCopiaCola);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 1500);
+    } catch {
+      // fallback simples
+      alert("Não consegui copiar automaticamente. Copie manualmente o código Pix.");
     }
   }
 
@@ -72,64 +91,136 @@ export default function CheckoutPage() {
     <main className="container">
       <div className="card">
         <div className="header">
-          <h1 className="h1">Pagamento via Pix</h1>
+          <h1 className="h1">Checkout</h1>
           <p className="lead">
-            Faça o Pix e depois clique em <b>“Já paguei / Enviar dados”</b> para eu iniciar sua leitura.
+            Plano: <b>{data.plano}</b> cartas • Valor: <b>R$ {planoInfo.valor.toFixed(2)}</b>
           </p>
 
           <div className="actions">
-            <button className="btn btn-primary" onClick={copyPix} disabled={!pixKey}>
-              {status === "copy" ? "Chave copiada ✅" : "Copiar chave Pix"}
-            </button>
-
-            <button
-              className="btn btn-ghost"
-              onClick={notifyPaid}
-              disabled={status === "sending" || status === "sent"}
-            >
-              {status === "sending" ? "Enviando..." : status === "sent" ? "Enviado ✅" : "Já paguei / Enviar dados"}
-            </button>
+            {/* Envia os dados para você por e-mail */}
+            {status !== "sent" ? (
+              <button
+                className="btn btn-primary"
+                onClick={notifyPaid}
+                disabled={status === "sending"}
+              >
+                {status === "sending" ? "Enviando..." : "Enviar dados"}
+              </button>
+            ) : (
+              <div className="small" style={{ marginTop: 6 }}>
+                ✅ Dados enviados. Agora pague via Pix abaixo.
+              </div>
+            )}
 
             <Link className="btn btn-ghost" href="/tiragem">
               Editar dados
             </Link>
-            {status === "sent" && (
-              <div className="actions" style={{ marginTop: 14 }}>
-                <a className="btn btn-primary" href="/">
-                  Voltar ao início
-                </a>
-              </div>
-            )}
+
+            <Link className="btn btn-ghost" href="/">
+              Início
+            </Link>
           </div>
-
-          <p className="small" style={{ marginTop: 12 }}>
-            <b>Plano:</b> {data.plano} cartas — <b>Valor:</b> R$ {planoInfo.valor.toFixed(2)} <br />
-            <b>Referência:</b> {txRef} (guarde caso precise)
-          </p>
-
-          {!pixKey ? (
-            <p className="small" style={{ color: "#b91c1c" }}>
-              PIX não configurado. Defina NEXT_PUBLIC_PIX_KEY no .env.local
-            </p>
-          ) : (
-            <div className="section" style={{ paddingTop: 10 }}>
-              <h2 style={{ marginTop: 0 }}>Chave Pix</h2>
-              <div className="card" style={{ padding: 14 }}>
-                <code style={{ wordBreak: "break-all" }}>{pixKey}</code>
-              </div>
-              <p className="small" style={{ marginTop: 10 }}>
-                Dica: no seu app do banco, cole a chave e confirme o valor.
-              </p>
-            </div>
-          )}
 
           {status === "error" && (
             <p className="small" style={{ color: "#b91c1c", marginTop: 10 }}>
-              Não consegui enviar o e-mail agora. Tente novamente.
+              Não consegui enviar agora. Tente novamente.
             </p>
           )}
         </div>
+
+        {/* ✅ APÓS ENVIAR: mostra QR + copiar */}
+        {status === "sent" && (
+          <div className="section">
+            <h2 style={{ marginTop: 0 }}>Pagamento via Pix</h2>
+
+            <div className="card" style={{ padding: 16 }}>
+              <div style={{ display: "grid", gap: 12 }}>
+                <div className="small">
+                  Escaneie o QR Code abaixo ou copie o código Pix para pagar.
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    padding: 12,
+                    borderRadius: 16,
+                    border: "1px solid rgba(109,40,217,.15)",
+                    background: "rgba(255,255,255,.7)",
+                  }}
+                >
+                  {/* QR predefinido por plano */}
+                  <img
+                    src={qrSrc}
+                    alt="QR Code Pix"
+                    style={{ width: 260, height: 260, objectFit: "contain" }}
+                  />
+                </div>
+
+                <div>
+                  <div className="small" style={{ marginBottom: 8 }}>
+                    Código Pix (copia e cola):
+                  </div>
+
+                  <div
+                    className="card"
+                    style={{
+                      padding: 12,
+                      borderRadius: 14,
+                      background: "rgba(255,255,255,.8)",
+                      border: "1px solid rgba(109,40,217,.15)",
+                    }}
+                  >
+                    <code style={{ wordBreak: "break-all" }}>
+                      {pixCopiaCola || "⚠️ Configure NEXT_PUBLIC_PIX_COPIA_COLA_* no .env.local"}
+                    </code>
+                  </div>
+
+                  <div className="actions" style={{ marginTop: 12 }}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={copyPix}
+                      disabled={!pixCopiaCola}
+                    >
+                      {copiado ? "Copiado ✅" : "Copiar código Pix"}
+                    </button>
+
+                    <a className="btn btn-ghost" href="/">
+                      Voltar ao início
+                    </a>
+                  </div>
+
+                  <p className="small" style={{ marginTop: 10 }}>
+                    Referência: <b>{txRef}</b>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Resumo sempre visível */}
+        <div className="section">
+          <h2 style={{ marginTop: 0 }}>Resumo</h2>
+          <div style={{ display: "grid", gap: 10 }}>
+            <Row k="Nome" v={data.nome} />
+            <Row k="WhatsApp" v={data.whatsapp} />
+            <Row k="Email" v={data.email} />
+            <Row k="Tema" v={data.tema === "Outro" ? (data.outroTema || "Outro") : data.tema} />
+            <Row k="Signo" v={data.signo} />
+            <Row k="Idade" v={String(data.idade)} />
+          </div>
+        </div>
       </div>
     </main>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 10 }}>
+      <strong>{k}:</strong>
+      <span style={{ color: "rgba(29,21,40,.85)" }}>{v}</span>
+    </div>
   );
 }
