@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter();
 
-  function goToTiragem() {
-    router.push("/tiragem");
+  function goToConsulta() {
+    router.push("/consulta");
   }
 
   function scrollToHowItWorks() {
@@ -25,7 +25,6 @@ export default function Home() {
         color: "#1d102b",
       }}
     >
-      {/* Header */}
       <header
         style={{
           maxWidth: 980,
@@ -60,13 +59,13 @@ export default function Home() {
               Altar Místico
             </div>
             <div style={{ fontSize: 12, color: "#5a4b73" }}>
-              Tiragens personalizadas
+              Consultas personalizadas
             </div>
           </div>
         </div>
 
         <button
-          onClick={goToTiragem}
+          onClick={goToConsulta}
           style={{
             cursor: "pointer",
             padding: "10px 14px",
@@ -78,11 +77,10 @@ export default function Home() {
             fontWeight: 700,
           }}
         >
-          Fazer tiragem
+          Fazer consulta
         </button>
       </header>
 
-      {/* Hero */}
       <section
         style={{
           maxWidth: 980,
@@ -102,7 +100,8 @@ export default function Home() {
               letterSpacing: "-1px",
             }}
           >
-            Tiragem de Tarot <span style={{ color: "#6a33b8" }}>Personalizada</span>
+            Consulta de Tarot{" "}
+            <span style={{ color: "#6a33b8" }}>Personalizada</span>
           </h1>
 
           <p
@@ -114,14 +113,14 @@ export default function Home() {
               maxWidth: 620,
             }}
           >
-            Responda algumas perguntas rápidas e receba uma leitura dirigida para o
-            tema que você precisa agora — amor, finanças, saúde, carreira e mais.
+            Responda algumas perguntas rápidas e receba uma leitura dirigida para
+            o tema que você precisa agora — amor, finanças, saúde, carreira e
+            mais.
           </p>
 
-          {/* CTA buttons */}
           <div style={{ display: "flex", gap: 12, marginTop: 18, flexWrap: "wrap" }}>
             <button
-              onClick={goToTiragem}
+              onClick={goToConsulta}
               style={{
                 cursor: "pointer",
                 padding: "14px 18px",
@@ -134,7 +133,7 @@ export default function Home() {
                 boxShadow: "0 18px 45px rgba(0,0,0,0.18)",
               }}
             >
-              Quero minha tiragem
+              Quero minha consulta
             </button>
 
             <button
@@ -155,7 +154,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Human reading notice */}
           <div
             style={{
               marginTop: 26,
@@ -183,7 +181,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Side card */}
         <div
           style={{
             borderRadius: 18,
@@ -215,7 +212,7 @@ export default function Home() {
             </div>
 
             <button
-              onClick={goToTiragem}
+              onClick={goToConsulta}
               style={{
                 marginTop: 14,
                 width: "100%",
@@ -239,7 +236,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How it works */}
       <section
         id="como-funciona"
         style={{
@@ -269,7 +265,7 @@ export default function Home() {
           <StepCard
             n="1"
             title="Você preenche o formulário"
-            text="Escolhe o tema da tiragem e informa seus dados (idade, signo, etc.)."
+            text="Escolhe o tema da consulta e informa seus dados (idade, signo, etc.)."
           />
           <StepCard
             n="2"
@@ -279,7 +275,7 @@ export default function Home() {
           <StepCard
             n="3"
             title="Eu preparo a leitura"
-            text="Após confirmado, eu realizo a tiragem manualmente e te respondo com a leitura."
+            text="Após confirmado, eu realizo a consulta manualmente e te respondo com a leitura."
           />
         </div>
 
@@ -303,7 +299,7 @@ export default function Home() {
 
           <div style={{ display: "flex", gap: 12, marginTop: 14, flexWrap: "wrap" }}>
             <button
-              onClick={goToTiragem}
+              onClick={goToConsulta}
               style={{
                 cursor: "pointer",
                 padding: "12px 16px",
@@ -314,7 +310,7 @@ export default function Home() {
                 fontWeight: 900,
               }}
             >
-              Ir para a tiragem
+              Ir para a consulta
             </button>
 
             <button
@@ -335,7 +331,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer
         style={{
           borderTop: "1px solid rgba(120,70,180,0.14)",
@@ -360,7 +355,6 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* responsive adjustments */}
       <style jsx global>{`
         @media (max-width: 900px) {
           section {
